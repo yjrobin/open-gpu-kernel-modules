@@ -140,6 +140,15 @@ nv_cap_t *nvidia_caps_root = NULL;
 NvU32 num_nv_devices = 0;
 NvU32 num_probed_nv_devices = 0;
 
+// yj start
+typedef struct
+{
+    NvU32 pid_ns;
+    NvU32 mem_limit;
+} vgpu_mem_limit_t;
+vgpu_mem_limit_t last_vgpu_mem_limit;
+// yj end
+
 /*
  * Global list and table of per-device state
  * note: both nv_linux_devices and nv_linux_minor_num_table
@@ -2443,8 +2452,19 @@ nvidia_ioctl(
                 status = -EFAULT;
                 goto done;
             }
-            nv_printf(NV_DBG_WARNINGS, "Receive VGPU_CTL : pid(tgid) = %d, vpid = %d, pid_namespace = %u, gpu_id = %d, mem_limit = %d\n",
-                        os_get_current_process(), task_pid_vnr(current), task_active_pid_ns(current)->ns.inum, nvl->minor_num, vgpu_ctl.mem_limit);
+            last_vgpu_mem_limit.pid_ns = task_active_pid_ns(current)->ns.inum;
+            last_vgpu_mem_limit.mem_limit = vgpu_ctl.mem_limit;
+            nv_printf(NV_DBG_WARNINGS, "Receive NV_4PD_VGPU_SET_MEM_LIMIT : pid(tgid) = %d, vpid = %d, pid_namespace = %u, gpu_id = %d, mem_limit = %d\n",
+                        os_get_current_process(), task_pid_vnr(current), last_vgpu_mem_limit.pid_ns, nvl->minor_num, last_vgpu_mem_limit.mem_limit);
+            break;
+        }
+        case NV_4PD_VGPU_GET_MEM_LIMIT:
+        {
+            vgpu_mem_limit_t* param = arg_copy;
+            param->pid_ns = last_vgpu_mem_limit.pid_ns;
+            param->mem_limit = last_vgpu_mem_limit.mem_limit;
+            nv_printf(NV_DBG_WARNINGS, "Receive NV_4PD_VGPU_GET_MEM_LIMIT: return pid_namespace = %u, mem_limit = %u\n",
+                        last_vgpu_mem_limit.pid_ns, last_vgpu_mem_limit.mem_limit);
             break;
         }
 // yj end

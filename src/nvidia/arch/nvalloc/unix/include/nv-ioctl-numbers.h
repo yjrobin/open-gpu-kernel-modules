@@ -41,6 +41,7 @@
 #define NV_ESC_EXPORT_TO_DMABUF_FD   (NV_IOCTL_BASE + 17)
 #define NV_ESC_WAIT_OPEN_COMPLETE    (NV_IOCTL_BASE + 18)
 // yj start
-#define NV_4PD_VGPU_SET_MEM_LIMIT              (NV_ESC_WAIT_OPEN_COMPLETE + 1)
+#define NV_4PD_VGPU_SET_MEM_LIMIT              (NV_IOCTL_BASE + 19)
+#define NV_4PD_VGPU_GET_MEM_LIMIT              (NV_IOCTL_BASE + 20)
 // yj end
 #endif
