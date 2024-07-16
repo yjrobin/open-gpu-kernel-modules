@@ -959,6 +959,25 @@ NV_STATUS RmIoctl(
             break;
         }
 
+        // // yj start
+        // case NV_4PD_VGPU_SET_MEM_LIMIT:
+        // {
+        //     NV_PRINTF(LEVEL_ERROR, "receive VGPU_CTL: 0x%x\n", cmd);
+        //     nv_4pd_vgpu_ctl_t vgpu_ctl = *(nv_4pd_vgpu_ctl_t*)data;
+        //     if (dataSize != sizeof(nv_4pd_vgpu_ctl_t))
+        //     {
+        //         nv_printf(NV_DBG_ERRORS,
+        //                 "NVRM-4PD: invalid ioctl 4PD_VGPU_CTL structure size!\n");
+        //         rmStatus = NV_ERR_NOT_SUPPORTED;
+        //         break;
+        //     }
+        //     nv_printf(NV_DBG_WARNINGS, "Receive VGPU_CTL : pid = %d, vpid = %d, gpu_id = %d, mem_limit = %d\n",
+        //                 vgpu_ctl.gpu_id, vgpu_ctl.mem_limit);
+        //     rmStatus = NV_OK;
+        //     break;
+        // }
+        // // yj end
+
         default:
         {
             NV_PRINTF(LEVEL_ERROR, "unknown NVRM ioctl command: 0x%x\n", cmd);

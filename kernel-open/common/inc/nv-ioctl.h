@@ -51,6 +51,13 @@ typedef struct nv_ioctl_xfer
     NvP64   ptr  NV_ALIGN_BYTES(8);
 } nv_ioctl_xfer_t;
 
+// yj start
+typedef struct nv_4pd_vgpu_ctl
+{
+    NvU32   mem_limit;
+} nv_4pd_vgpu_ctl_t;
+
+// yj end
 typedef struct nv_ioctl_card_info
 {
     NvBool        valid;
