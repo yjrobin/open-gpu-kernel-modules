@@ -22,6 +22,7 @@
  */
 
 #include <linux/module.h>  // for MODULE_FIRMWARE
+#include <linux/pid_namespace.h>
 
 // must precede "nv.h" and "nv-firmware.h" includes
 #define NV_FIRMWARE_PATH_FOR_FILENAME(filename)  "nvidia/" NV_VERSION_STRING "/" filename
@@ -680,7 +681,7 @@ nv_module_init(nv_stack_t **sp)
         goto cap_drv_exit;
     }
 
-    nv_init_rsync_info(); 
+    nv_init_rsync_info();
     nv_detect_conf_compute_platform();
 
     if (!rm_init_rm(*sp))
@@ -2319,6 +2320,9 @@ nvidia_ioctl(
     void *arg_copy = NULL;
     size_t arg_size = 0;
     int arg_cmd;
+// yj start
+    nv_4pd_vgpu_ctl_t vgpu_ctl;
+// yj end
 
     nv_printf(NV_DBG_INFO, "NVRM: ioctl(0x%x, 0x%x, 0x%x)\n",
         _IOC_NR(cmd), (unsigned int) i_arg, _IOC_SIZE(cmd));
@@ -2422,6 +2426,28 @@ nvidia_ioctl(
 
     switch (arg_cmd)
     {
+// yj start
+        case NV_4PD_VGPU_SET_MEM_LIMIT:
+        {
+            if (arg_size != sizeof(nv_4pd_vgpu_ctl_t*))
+            {
+                nv_printf(NV_DBG_WARNINGS,
+                        "NVRM-4PD: invalid ioctl 4PD_VGPU_CTL structure size!, arg_size = %d, should be = %d\n", arg_size, sizeof(nv_4pd_vgpu_ctl_t*));
+                status = -EINVAL;
+                goto done;
+            }
+            if (NV_COPY_FROM_USER(&vgpu_ctl, arg_ptr, sizeof(vgpu_ctl)))
+            {
+                nv_printf(NV_DBG_ERRORS,
+                        "NVRM: failed to copy in ioctl vgpu_ctl data!\n");
+                status = -EFAULT;
+                goto done;
+            }
+            nv_printf(NV_DBG_WARNINGS, "Receive VGPU_CTL : pid(tgid) = %d, vpid = %d, pid_namespace(host pid of vpid=1) = %u, gpu_id = %d, mem_limit = %d\n",
+                        os_get_current_process(), task_pid_vnr(current), task_active_pid_ns(current)->ns.inum, nvl->minor_num, vgpu_ctl.mem_limit);
+            break;
+        }
+// yj end
         case NV_ESC_QUERY_DEVICE_INTR:
         {
             nv_ioctl_query_device_intr *query_intr = arg_copy;
@@ -4746,7 +4772,7 @@ nvidia_transition_dynamic_power(
         /*
          * Return -EAGAIN so that kernel PM core will not treat this as a fatal error and
          * reschedule the callback again in the future.
-         */ 
+         */
         return -EAGAIN;
     }
 
@@ -5925,7 +5951,7 @@ void NV_API_CALL nv_flush_coherent_cpu_cache_range(nv_state_t *nv, NvU64 cpu_vir
 #elif NVCPU_IS_AARCH64
     NvU64 va, cbsize;
     NvU64 end_cpu_virtual = cpu_virtual + size;
-    
+
     nv_printf(NV_DBG_INFO,
             "Flushing CPU virtual range [0x%llx, 0x%llx)\n",
             cpu_virtual, end_cpu_virtual);
