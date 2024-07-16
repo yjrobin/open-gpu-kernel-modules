@@ -22,6 +22,7 @@
  */
 
 #include <linux/module.h>  // for MODULE_FIRMWARE
+#include <linux/pid_namespace.h>
 
 // must precede "nv.h" and "nv-firmware.h" includes
 #define NV_FIRMWARE_PATH_FOR_FILENAME(filename)  "nvidia/" NV_VERSION_STRING "/" filename
