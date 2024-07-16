@@ -2443,7 +2443,7 @@ nvidia_ioctl(
                 status = -EFAULT;
                 goto done;
             }
-            nv_printf(NV_DBG_WARNINGS, "Receive VGPU_CTL : pid(tgid) = %d, vpid = %d, pid_namespace(host pid of vpid=1) = %u, gpu_id = %d, mem_limit = %d\n",
+            nv_printf(NV_DBG_WARNINGS, "Receive VGPU_CTL : pid(tgid) = %d, vpid = %d, pid_namespace = %u, gpu_id = %d, mem_limit = %d\n",
                         os_get_current_process(), task_pid_vnr(current), task_active_pid_ns(current)->ns.inum, nvl->minor_num, vgpu_ctl.mem_limit);
             break;
         }
